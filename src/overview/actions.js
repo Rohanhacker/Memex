@@ -227,18 +227,17 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
             : 'Create result bookmark',
     })
 
-    try {
-        // Either perform adding or removal of bookmark if
-        if (hasBookmark) {
-            await removeBookmarkByUrl({ url })
-        } else {
-            await createBookmarkByUrl({ url })
-        }
-    } catch (error) {
-        dispatch(changeHasBookmark(index)) // Reset UI state in case of error
-    } finally {
-        updateLastActive() // Consider user active (analytics)
+    // Reset UI state in case of error
+    const errHandler = err => dispatch(changeHasBookmark(index))
+
+    // Either perform adding or removal of bookmark; do not wait for ops to complete
+    if (hasBookmark) {
+        removeBookmarkByUrl({ url }).catch(errHandler)
+    } else {
+        createBookmarkByUrl({ url }).catch(errHandler)
     }
+
+    updateLastActive() // Consider user active (analytics)
 }
 
 export const showTags = index => (dispatch, getState) => {
