@@ -45,7 +45,7 @@ function getDexieSchema(collections: RegistryCollections) {
  */
 const convertIndexToDexieExps = ({ fields, indices }: CollectionDefinition) =>
     indices
-        // .sort(({ pk }) => (pk ? -1 : 1)) // PK indexes always come first in Dexie
+        .sort(({ pk }) => (pk ? -1 : 1)) // PK indexes always come first in Dexie
         .map(indexDef => {
             // Convert from StorageManager compound index to Dexie compound index
             // Note that all other `IndexDefinition` opts are ignored for compound indexes
@@ -53,13 +53,17 @@ const convertIndexToDexieExps = ({ fields, indices }: CollectionDefinition) =>
                 return `[${indexDef.field[0]}+${indexDef.field[1]}]`
             }
 
-            // Create Dexie MultiEntry index for text fields: http://dexie.org/docs/MultiEntry-Index
+            // Create Dexie MultiEntry index for indexed text fields: http://dexie.org/docs/MultiEntry-Index
             // TODO: throw error if text field + PK index
-            const fieldDef = fields[indexDef.field]
-            let listPrefix = fieldDef.type === 'text' ? '*' : ''
+            if (fields[indexDef.field].type === 'text') {
+                const fullTextField =
+                    indexDef.fullTextIndexName ||
+                    StorageRegistry.createTermsIndex(indexDef.field)
+                return `*${fullTextField}`
+            }
 
             // Note that order of these statements matters
-            listPrefix = indexDef.unique ? '&' : listPrefix
+            let listPrefix = indexDef.unique ? '&' : ''
             listPrefix = indexDef.pk && indexDef.autoInc ? '++' : listPrefix
 
             return `${listPrefix}${indexDef.field}`

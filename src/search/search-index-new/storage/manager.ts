@@ -36,8 +36,7 @@ export class StorageManager implements ManageableStorage {
         }
 
         if (fieldDef._index && fieldDef.type === 'text') {
-            const fullTextField =
-                indexDef.fullTextIndexName || `_${fieldName}_terms`
+            const fullTextField = indexDef.fullTextIndexName || StorageRegistry.createTermsIndex(fieldName)
             object[fullTextField] = [...extractTerms(object[fieldName])]
         }
     }
