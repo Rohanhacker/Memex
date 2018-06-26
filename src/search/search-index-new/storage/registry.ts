@@ -21,25 +21,6 @@ export default class StorageRegistry implements RegisterableStorage {
     public collections: RegistryCollections = {}
     public collectionsByVersion: RegistryCollectionsVersionMap = {}
 
-    /**
-     * Handles mutating a collection's definition to flag all fields that are declared to be
-     * indexable as indexed fields.
-     */
-    private static _registerIndexedFields(def: CollectionDefinition) {
-        const flagField = (fieldName: string) =>
-            (def.fields[fieldName]._index = true)
-
-        const indices = def.indices || []
-        indices.forEach(({ field }) => {
-            // Compound indexes need to flag all specified fields
-            if (field instanceof Array) {
-                field.forEach(flagField)
-            } else {
-                flagField(field)
-            }
-        })
-    }
-
     registerCollection(name: string, defs: CollectionDefinitions) {
         if (!(defs instanceof Array)) {
             defs = [defs]
@@ -56,8 +37,6 @@ export default class StorageRegistry implements RegisterableStorage {
                     fieldDef.fieldObject = new FieldClass(fieldDef)
                 }
             })
-
-            StorageRegistry._registerIndexedFields(def)
 
             const version = def.version.getTime()
             this.collectionsByVersion[version] =

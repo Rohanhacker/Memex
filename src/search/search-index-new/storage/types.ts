@@ -30,7 +30,6 @@ export interface CollectionFields {
 export interface CollectionField {
     type: FieldType
     fieldObject?: Field
-    _index?: boolean
 }
 
 export type IndexSourceFields = string | [string, string]
