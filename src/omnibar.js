@@ -102,11 +102,17 @@ async function makeSuggestion(query, suggest) {
         setOmniboxMessage(
             'Your search terms are very vague, please try and use more unique language',
         )
+    } else if (searchResults.requiresMigration) {
+        setOmniboxMessage(
+            '[ACTION REQUIRED] Upgrade to new search version. Click here.',
+        )
     } else if (searchResults.docs.length === 0) {
         setOmniboxMessage('No results found for this query.')
     } else {
         setOmniboxMessage(
-            `Found these ${searchResults.totalCount} pages in your memory: (press enter to see all results)`,
+            `Found these ${
+                searchResults.totalCount
+            } pages in your memory: (press enter to see all results)`,
         )
     }
 
